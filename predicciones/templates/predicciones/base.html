@@ -1,0 +1,116 @@
+{% load static %}
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#141518">
+  <title>{% block title %}GymPredictAI | Gestión y crecimiento{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'predicciones/css/estilos.css' %}?v=3">
+  <link rel="stylesheet" href="{% static 'predicciones/css/cuenta.css' %}?v=4">
+  <link rel="stylesheet" href="{% static 'predicciones/css/mejoras.css' %}?v=5">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js" defer></script>
+  <script src="{% static 'predicciones/js/app.js' %}?v=5" defer></script>
+  {% block head %}{% endblock %}
+</head>
+<body data-initial-view="{{ initial_view|default:'inicio' }}" data-dashboard="{% if request.resolver_match.url_name == 'dashboard' %}true{% else %}false{% endif %}">
+<div class="app-shell">
+  <aside class="sidebar" id="sidebar">
+    <a class="brand" href="{% url 'dashboard' %}" aria-label="GymPredictAI, ir al resumen">
+      <span class="brand-mark"><span>GP</span></span>
+      <span class="brand-copy"><b>GymPredict<span>AI</span></b><small>BUSINESS INTELLIGENCE</small></span>
+    </a>
+
+    <details class="gym-switch-wrap">
+      <summary class="gym-switch" aria-label="Opciones de Mi gimnasio">
+        <span class="gym-avatar">G</span><span class="gym-switch-copy"><b>Mi gimnasio</b><small>Espacio de trabajo</small></span><span class="chevron">⌄</span>
+      </summary>
+      <div class="gym-switch-popover">
+        <span class="menu-caption">MI ESPACIO</span>
+        {% if user.is_superuser %}<a href="{% url 'usuarios' %}">Administrar usuarios</a>{% endif %}
+        <a href="{% url 'dashboard' %}#inicio">Abrir resumen</a>
+        <a href="{% url 'registrar_mes' %}">Registrar un mes</a>
+        {% if user.is_authenticated %}
+        <form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="account-logout" type="submit">Cerrar sesión · {{ user.username }}</button></form>
+        {% else %}<a href="{% url 'login' %}">Ingresar con usuario</a>{% endif %}
+        <span class="menu-footnote">Base conectada · SQLite</span>
+      </div>
+    </details>
+
+    <nav class="nav-groups" aria-label="Navegación principal">
+      <div class="nav-group"><p>GENERAL</p>
+        {% if request.resolver_match.url_name == 'dashboard' %}
+          <button class="nav-link is-active" data-view-target="inicio"><span class="nav-icon">▦</span><span>Resumen</span></button>
+          <button class="nav-link" data-view-target="prediccion"><span class="nav-icon">↗</span><span>Predicciones</span><em class="nav-new">IA</em></button>
+        {% else %}
+          <a class="nav-link" href="{% url 'dashboard' %}#inicio"><span class="nav-icon">▦</span><span>Resumen</span></a>
+          <a class="nav-link" href="{% url 'dashboard' %}#prediccion"><span class="nav-icon">↗</span><span>Predicciones</span></a>
+        {% endif %}
+      </div>
+      <div class="nav-group"><p>GESTIÓN</p>
+        {% if request.resolver_match.url_name == 'dashboard' %}
+          <button class="nav-link" data-view-target="registros"><span class="nav-icon">▤</span><span>Registros mensuales</span></button>
+          <button class="nav-link" data-view-target="marketing"><span class="nav-icon">◉</span><span>Marketing</span></button>
+          <button class="nav-link" data-view-target="retencion"><span class="nav-icon">♡</span><span>Retención</span></button>
+          <button class="nav-link" data-view-target="finanzas"><span class="nav-icon">＄</span><span>Finanzas</span></button>
+        {% else %}
+          <a class="nav-link" href="{% url 'dashboard' %}#registros"><span class="nav-icon">▤</span><span>Registros mensuales</span></a>
+          <a class="nav-link" href="{% url 'dashboard' %}#marketing"><span class="nav-icon">◉</span><span>Marketing</span></a>
+          <a class="nav-link" href="{% url 'dashboard' %}#retencion"><span class="nav-icon">♡</span><span>Retención</span></a>
+          <a class="nav-link" href="{% url 'dashboard' %}#finanzas"><span class="nav-icon">＄</span><span>Finanzas</span></a>
+        {% endif %}
+      </div>
+      <a class="nav-link" href="{% url 'redes' %}"><span class="nav-icon">◉</span><span>Redes conectadas</span></a>
+      <div class="nav-group"><p>CUENTA</p>
+        {% if request.resolver_match.url_name == 'dashboard' %}
+          <button class="nav-link" data-view-target="planes"><span class="nav-icon">◇</span><span>Planes y cobros</span></button>
+        {% else %}
+          <a class="nav-link" href="{% url 'dashboard' %}#planes"><span class="nav-icon">◇</span><span>Planes y cobros</span></a>
+        {% endif %}
+      </div>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div class="upgrade-card"><span class="upgrade-mark">✦</span><b>Decisiones más claras</b><p>Convertí tus registros mensuales en acciones medibles.</p>
+        {% if request.resolver_match.url_name == 'dashboard' %}<button data-view-target="prediccion">Ver proyección <span>›</span></button>{% else %}<a href="{% url 'dashboard' %}#prediccion">Ver proyección <span>›</span></a>{% endif %}
+      </div>
+      <div class="profile-row"><span class="profile-avatar">G</span><span><b>{% if user.is_authenticated %}{{ user.username }}{% else %}Mi gimnasio{% endif %}</b><small>{% if es_produccion %}Sesión en línea{% else %}Entorno local{% endif %}</small></span><span class="online-dot" title="Conectado"></span></div>
+    </div>
+  </aside>
+
+  <main class="main-area">
+    <header class="topbar">
+      <button class="icon-button mobile-menu" id="mobile-menu" aria-label="Abrir menú" aria-expanded="false">☰</button>
+      <div class="breadcrumb"><span>GymPredictAI</span><span class="slash">/</span><b id="breadcrumb-title">{% if request.resolver_match.url_name == 'dashboard' %}Centro de crecimiento{% else %}Gestión de datos{% endif %}</b></div>
+      <div class="top-actions">
+        <span class="sync-status"><i></i> Base conectada</span>
+        {% if request.resolver_match.url_name == 'dashboard' %}<a class="icon-button" href="{% url 'exportar_datos' %}" title="Exportar registros CSV" aria-label="Exportar registros CSV">⇩</a>{% endif %}
+        <button class="help-top" id="help-open"><span>ⓘ</span> Centro de ayuda</button>
+        <span class="top-avatar">G</span>
+      </div>
+    </header>
+
+    <div class="content">
+      {% if messages %}<div class="toast-stack" aria-live="polite">{% for message in messages %}<div class="toast {{ message.tags }}"><span>{{ message }}</span><button type="button" class="toast-close" aria-label="Cerrar aviso">×</button></div>{% endfor %}</div>{% endif %}
+      {% block content %}{% endblock %}
+      <footer class="footer"><span>GymPredictAI <i></i> Datos guardados en tu base.</span><span>Las proyecciones orientan decisiones; no garantizan resultados.</span></footer>
+    </div>
+  </main>
+
+  <button class="assistant-launch" id="assistant-launch" aria-label="Abrir asistente"><span>✦</span><b>Asistente</b></button>
+  <aside class="assistant-panel" id="assistant-panel" hidden aria-label="Asistente de GymPredictAI">
+    <div class="assistant-head"><span class="assistant-icon">✦</span><div><b>Asistente GymPredict</b><small>Ayuda guiada del producto</small></div><button class="icon-button" id="assistant-close" aria-label="Cerrar asistente">×</button></div>
+    <div class="assistant-body"><b>¿Qué querés resolver?</b><p>Te explico las secciones y cómo leer los indicadores.</p>
+      <div class="assistant-prompts"><button data-assistant-question="¿Cómo se calcula la predicción?">¿Cómo se calcula la predicción?</button><button data-assistant-question="¿Qué hago primero?">¿Qué hago primero?</button><button data-assistant-question="¿Cómo uso marketing?">¿Cómo uso marketing?</button></div>
+      <div class="assistant-answer" id="assistant-answer" hidden></div>
+    </div>
+    <form class="assistant-input" id="assistant-form"><input id="assistant-question" placeholder="Preguntá sobre el panel…" autocomplete="off"><button aria-label="Enviar consulta">›</button></form>
+    <small class="assistant-note">Asistente guiado: las respuestas usan reglas locales, no un modelo de lenguaje conectado.</small>
+  </aside>
+</div>
+{% block data %}{% endblock %}
+</body>
+</html>

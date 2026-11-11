@@ -1,0 +1,13 @@
+{% extends "predicciones/base.html" %}
+{% load predicciones_format %}
+{% block title %}GymPredictAI | {% if modo == 'editar' %}Editar período{% else %}Registrar mes{% endif %}{% endblock %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow"><i class="eyebrow-dot"></i> GESTIÓN DE DATOS</div><h1>{% if modo == "editar" %}Editar período{% else %}Registrar un mes{% endif %}</h1><p>El registro se guarda en SQLite y actualiza tus indicadores y proyecciones.</p></div><a class="button secondary" href="{% url 'dashboard' %}#registros">← Volver al historial</a></div>
+<section class="panel form-panel"><form method="post" class="record-form" novalidate>{% csrf_token %}{{ formulario.non_field_errors }}
+  <div class="form-section"><div><small>01 · PERÍODO</small><h2>Identificá el mes</h2></div><div class="field field-wide"><label for="{{ formulario.fecha.id_for_label }}">{{ formulario.fecha.label }}</label>{{ formulario.fecha }}{{ formulario.fecha.errors }}<small>Seleccioná el primer día del mes.</small></div></div>
+  <div class="form-section"><div><small>02 · SOCIOS</small><h2>Altas y bajas</h2></div><div class="form-grid three">{% for field in formulario %}{% if field.name == "alumnos_inicio" or field.name == "alumnos_nuevos" or field.name == "bajas" %}<div class="field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{{ field.errors }}</div>{% endif %}{% endfor %}</div></div>
+  <div class="form-section"><div><small>03 · CAPTACIÓN</small><h2>Consultas y pruebas</h2></div><div class="form-grid two">{% for field in formulario %}{% if field.name == "consultas" or field.name == "clases_prueba" %}<div class="field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{{ field.errors }}</div>{% endif %}{% endfor %}</div></div>
+  <div class="form-section"><div><small>04 · COMERCIAL</small><h2>Cuota y promoción</h2></div><div class="form-grid three">{% for field in formulario %}{% if field.name == "inversion_publicidad" or field.name == "cuota_mensual" %}<div class="field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{{ field.errors }}</div>{% endif %}{% endfor %}<label class="toggle-field"><span><b>Hubo una promoción</b><small>Ayuda a comparar el mes con una oferta.</small></span>{{ formulario.promocion }}</label></div></div>
+  <div class="dialog-foot"><a class="button secondary" href="{% url 'dashboard' %}#registros">Cancelar</a><button class="button primary">{% if modo == "editar" %}Guardar cambios{% else %}Guardar período{% endif %}</button></div>
+</form></section>
+{% endblock %}

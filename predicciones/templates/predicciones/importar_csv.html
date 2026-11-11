@@ -1,0 +1,20 @@
+{% extends 'predicciones/base.html' %}
+{% load predicciones_format %}
+{% block title %}Importar CSV | GymPredictAI{% endblock %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow">DATOS DEL GIMNASIO</div><h1>Importar historial</h1><p>Revisá los cambios antes de incorporarlos a la base.</p></div><a class="button secondary" href="{% url 'dashboard' %}#registros">← Volver al historial</a></div>
+{% for error in errores_importacion %}<div class="inline-error" role="alert">{{ error }}</div>{% endfor %}
+<section class="panel import-panel"><div class="panel-title"><div><small>01 · ELEGÍ EL ARCHIVO</small><h2>Cargá tu CSV</h2></div><a class="button secondary compact" href="{% url 'plantilla_csv' %}">Descargar plantilla</a></div>
+<p class="model-copy">Formato UTF-8, separado por comas o punto y coma. Máximo 2 MB y 1.200 meses. Las fechas se escriben como 2025-01-01 o 2025-01. Para decimales con coma, usá punto y coma como separador.</p>
+<form method="post" enctype="multipart/form-data" class="data-form" novalidate>{% csrf_token %}<input type="hidden" name="accion" value="previsualizar">{{ formulario.non_field_errors }}
+{% for field in formulario %}<div class="field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{{ field.errors }}</div>{% endfor %}
+<button class="button primary" type="submit">Revisar archivo →</button></form></section>
+{% if pendiente %}
+<section class="panel import-panel"><div class="panel-title"><div><small>02 · CONFIRMÁ LOS CAMBIOS</small><h2>{{ pendiente.filename }}</h2></div><span class="status-pill yes">Validado</span></div>
+<div class="metrics-grid three"><article class="metric-card"><span>Meses nuevos</span><b class="metric-value">{{ pendiente.totals.creados }}</b></article><article class="metric-card"><span>Meses que se actualizan</span><b class="metric-value">{{ pendiente.totals.actualizados }}</b></article><article class="metric-card"><span>Sin cambios</span><b class="metric-value">{{ pendiente.totals.omitidos }}</b></article></div>
+<p class="model-copy">Muestra de {{ muestra|length }} de {{ pendiente.rows|length }} meses. Los meses que no están en este archivo se conservan. Esta vista previa vence a los 30 minutos.</p>
+<div class="table-scroll"><table class="data-table"><thead><tr><th>Período</th><th>Socios inicio</th><th>Consultas</th><th>Pruebas</th><th>Inversión</th><th>Cuota</th><th>Altas</th><th>Bajas</th><th>Promo</th></tr></thead><tbody>{% for row in muestra %}<tr><td>{{ row.fecha }}</td><td>{{ row.alumnos_inicio|numero }}</td><td>{{ row.consultas|numero }}</td><td>{{ row.clases_prueba|numero }}</td><td>{{ row.inversion_publicidad|pesos }}</td><td>{{ row.cuota_mensual|pesos }}</td><td>{{ row.alumnos_nuevos|numero }}</td><td>{{ row.bajas|numero }}</td><td>{{ row.promocion|yesno:'Sí,No' }}</td></tr>{% endfor %}</tbody></table></div>
+<form method="post" class="dialog-foot">{% csrf_token %}<input type="hidden" name="accion" value="confirmar"><input type="hidden" name="token" value="{{ pendiente.token }}"><a class="button secondary" href="{% url 'dashboard' %}#registros">Volver sin importar</a><button class="button primary" type="submit">Confirmar importación</button></form></section>
+{% endif %}
+<section class="panel import-panel"><div class="panel-title"><div><small>TRAZABILIDAD</small><h2>Últimas importaciones</h2></div></div><div class="table-scroll"><table class="data-table"><thead><tr><th>Fecha</th><th>Archivo</th><th>Nuevos</th><th>Actualizados</th><th>Sin cambios</th></tr></thead><tbody>{% for lote in lotes %}<tr><td>{{ lote.creada|date:'d/m/Y H:i' }}</td><td>{{ lote.archivo }}</td><td>{{ lote.creados }}</td><td>{{ lote.actualizados }}</td><td>{{ lote.omitidos }}</td></tr>{% empty %}<tr><td colspan="5">Todavía no hay importaciones registradas.</td></tr>{% endfor %}</tbody></table></div></section>
+{% endblock %}

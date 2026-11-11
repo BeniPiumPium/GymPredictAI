@@ -1,0 +1,6 @@
+{% extends 'predicciones/base.html' %}
+{% block title %}Campaña | GymPredictAI{% endblock %}
+{% block content %}
+<div class="page-heading"><div><div class="eyebrow">MARKETING</div><h1>{% if modo == 'editar' %}Editar campaña{% else %}Registrar campaña{% endif %}</h1><p>Los cambios actualizan el embudo y los totales por canal.</p></div><a class="button secondary" href="{% url 'dashboard' %}#marketing">← Volver a marketing</a></div>
+<section class="panel form-panel"><form method="post" class="record-form" novalidate>{% csrf_token %}{{ formulario.non_field_errors }}<div class="form-grid three">{% for field in formulario %}<div class="field"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{{ field.errors }}</div>{% endfor %}</div><p class="source-note">Alcance representa personas alcanzadas. Una misma persona puede hacer más de un clic. Contactos, pruebas y altas deben corresponder a la misma campaña y período.</p><div class="dialog-foot"><a class="button secondary" href="{% url 'dashboard' %}#marketing">Cancelar</a><button class="button primary" type="submit">Guardar campaña</button></div></form></section>
+{% endblock %}

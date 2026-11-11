@@ -1,0 +1,39 @@
+
+# Entorno virtual
+venv/
+.venv/
+.venv_anterior_*/
+
+# Archivos temporales de Python
+__pycache__/
+*.py[cod]
+
+# Transacciones temporales de SQLite
+
+db.sqlite3-journal
+
+# Secretos y configuración privada
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Archivos del editor
+.vscode/
+.idea/
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Archivos generados
+*.log
+.pytest_cache/
+.ruff_cache/
+.coverage
+
+# Archivos cargados por usuarios
+media/
+staticfiles/
+respaldos/

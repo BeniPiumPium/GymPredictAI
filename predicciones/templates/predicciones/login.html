@@ -1,0 +1,29 @@
+{% load static %}
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Ingresar | GymPredictAI</title>
+  <link rel="stylesheet" href="{% static 'predicciones/css/estilos.css' %}?v=4">
+  <link rel="stylesheet" href="{% static 'predicciones/css/cuenta.css' %}?v=4">
+</head>
+<body class="auth-page">
+  <main class="auth-card">
+    <span class="brand-mark"><span>GP</span></span>
+    <div class="eyebrow">GYMPREDICTAI</div>
+    <h1>Tu gimnasio,<br>en un solo lugar.</h1>
+    <p>Ingresá para consultar tus indicadores y administrar los registros.</p>
+    {% if form.errors %}<div class="inline-error" role="alert">No pudimos iniciar sesión. Revisá tu usuario y contraseña.</div>{% endif %}
+    <form method="post">
+      {% csrf_token %}
+      <label class="field" for="id_username"><span>Usuario</span>{{ form.username }}</label>
+      <label class="field" for="id_password"><span>Contraseña</span>{{ form.password }}</label>
+      <input type="hidden" name="next" value="{{ next }}">
+      <button class="button primary full" type="submit">Ingresar <span>›</span></button>
+    </form>
+    <p class="auth-note">Acceso privado para el equipo del gimnasio.</p>
+  </main>
+</body>
+</html>
